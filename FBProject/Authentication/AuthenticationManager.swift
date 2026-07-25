@@ -8,7 +8,7 @@
 import FirebaseAuth
 import Foundation
 
-struct UserData {
+struct UserAuth {
     let id: String
     let email: String?
     let photo: String?
@@ -33,28 +33,28 @@ final class AuthenticationManager {
         auth.currentUser != nil
     }
     
-    func getUserData() -> UserData? {
+    func getUserData() -> UserAuth? {
         guard let user = auth.currentUser else { return nil }
-        return UserData(from: user)
+        return UserAuth(from: user)
     }
     	
     func signOut() throws {
         try auth.signOut()
     }
     
-    func createUser(email: String, password: String) async throws -> UserData {
+    func createUser(email: String, password: String) async throws -> UserAuth {
         try await auth.createUser(withEmail: email, password: password)
-        return UserData(from: auth.currentUser!)
+        return UserAuth(from: auth.currentUser!)
     }
     
-    func signInUser(email: String, password: String) async throws -> UserData {
+    func signInUser(email: String, password: String) async throws -> UserAuth {
         let authDataResult = try await auth.signIn(withEmail: email, password: password)
-        return UserData(from: authDataResult.user)
+        return UserAuth(from: authDataResult.user)
     }
     
-    func signInAnonymous() async throws -> UserData {
+    func signInAnonymous() async throws -> UserAuth {
         let authDataResult = try await auth.signInAnonymously()
-        return UserData(from: authDataResult.user)
+        return UserAuth(from: authDataResult.user)
     }
     
     func deleteUser() async throws {
@@ -66,39 +66,39 @@ final class AuthenticationManager {
     
     
     
-    private func signInWithCredential(_ credential: AuthCredential) async throws -> UserData {
+    private func signInWithCredential(_ credential: AuthCredential) async throws -> UserAuth {
         let authDataResult = try await auth.signIn(with: credential)
-        return UserData(from: authDataResult.user)
+        return UserAuth(from: authDataResult.user)
     }
     
-    func signInWithGoogle(tokens: GoogleTokens) async throws -> UserData {
+    func signInWithGoogle(tokens: GoogleTokens) async throws -> UserAuth {
         let credential = GoogleAuthProvider.credential(withIDToken: tokens.idToken, accessToken: tokens.accessToken)
         return try await signInWithCredential(credential)
     }
     
-    func signInWithApple(tokens: AppleTokens) async throws -> UserData {
+    func signInWithApple(tokens: AppleTokens) async throws -> UserAuth {
         let credential = OAuthProvider.appleCredential(withIDToken: tokens.idToken, rawNonce: tokens.rawNonce, fullName: tokens.fullName)
         return try await signInWithCredential(credential)
     }
     
     
     
-    func linkGoogle(tokens: GoogleTokens) async throws -> UserData {
+    func linkGoogle(tokens: GoogleTokens) async throws -> UserAuth {
         let credential = GoogleAuthProvider.credential(withIDToken: tokens.idToken, accessToken: tokens.accessToken)
         return try await linkCredential(credential)
     }
     
-    func linkApple(tokens: AppleTokens) async throws -> UserData {
+    func linkApple(tokens: AppleTokens) async throws -> UserAuth {
         let credential = OAuthProvider.appleCredential(withIDToken: tokens.idToken, rawNonce: tokens.rawNonce, fullName: tokens.fullName)
         return try await linkCredential(credential)
     }
     
-    private func linkCredential(_ credential: AuthCredential) async throws -> UserData {
+    private func linkCredential(_ credential: AuthCredential) async throws -> UserAuth {
         guard let user = auth.currentUser else {
             throw URLError(.cannotFindHost)
         }
         
         let authDataResult = try await user.link(with: credential)
-        return UserData(from: authDataResult.user)
+        return UserAuth(from: authDataResult.user)
     }
 }
