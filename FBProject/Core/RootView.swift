@@ -13,9 +13,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if !showAuthView {
-                NavigationStack {
-                    ProfileVIew(showAuthView: $showAuthView)
-                }
+                TabbarView(showAuthView: $showAuthView)
             }
         }
         .onAppear {
