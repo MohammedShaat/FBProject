@@ -14,6 +14,9 @@ struct RootView: View {
         ZStack {
             if !showAuthView {
                 TabbarView(showAuthView: $showAuthView)
+                
+//                CrashView()
+//                PerformanceView()
             }
         }
         .onAppear {

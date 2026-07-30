@@ -20,19 +20,26 @@ final class ProductsViewModel {
     
     private var lastDocSnap: DocumentSnapshot?
     
+    private let traceForGetProduct = PerformanceManager(name: "func_get_products")
+    
     func getProducts() {
+        traceForGetProduct.start()
         Task {
             do {
                 loading = true
+                traceForGetProduct.addLog(value: "start", for: "fetch_state")
                 let (newProducts, docSnap) = try await ProductsManager.shared.getProducts(categoryOption: filterOption, sortOption: sortOption, descending: descending, count: 8, lastDocumentSnapshot: lastDocSnap)
+                traceForGetProduct.addLog(value: "succeeded", for: "fetch_state")
                 products.append(contentsOf: newProducts)
                 if let docSnap {
                     lastDocSnap = docSnap
                 }
             } catch {
                 print("Failed to get products:\n", error)
+                traceForGetProduct.addLog(value: "Failed", for: "fetch_state")
             }
             loading = false
+            traceForGetProduct.stop()
         }
     }
     

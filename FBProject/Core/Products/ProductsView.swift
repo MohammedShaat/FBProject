@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAnalytics
 
 struct ProductsView: View {
     @State private var viewModel = ProductsViewModel()
@@ -16,6 +17,7 @@ struct ProductsView: View {
                 ProductItemView(product: product)
                     .contextMenu(menuItems: {
                         Button("Add to favorites") {
+                            AnalyticsManager.shared.log(name: "favorite_clicked")
                             viewModel.addProductToFavorites(id: String(product.id))
                         }
                     })
@@ -35,6 +37,7 @@ struct ProductsView: View {
         }
         .onAppear(perform: viewModel.getProducts)
         .navigationTitle("Products")
+        .analyticsScreen(name: "ProductsView")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 let binding = Binding {
@@ -57,6 +60,11 @@ struct ProductsView: View {
                             }
                         }
                     }
+                    .onChange(of: viewModel.sortOption) {
+                        AnalyticsManager.shared.log(name: "sort_option", parameters: [
+                            "option": viewModel.sortOption.rawValue
+                        ])
+                    }
                 }
             }
             
@@ -71,7 +79,12 @@ struct ProductsView: View {
                     Picker("Filter products by", selection: binding) {
                         ForEach(CategoryOptions.allCases, id: \.self) { option in
                             Text(option.rawValue.capitalized)
-                        }
+                        }	
+                    }
+                    .onChange(of: viewModel.filterOption) {
+                        AnalyticsManager.shared.log(name: "filter_option", parameters: [
+                            "option": viewModel.filterOption.rawValue
+                        ])
                     }
                 }
             }
